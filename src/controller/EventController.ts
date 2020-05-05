@@ -11,6 +11,7 @@ export async function eventGetAll(req: Request, res: Response): Promise<void> {
     },
   };
 
+  // Check request query
   if (
     Object.prototype.hasOwnProperty.call(req.query, 'from') &&
     Object.prototype.hasOwnProperty.call(req.query, 'to')
