@@ -16,13 +16,33 @@ createConnection()
     Routes.forEach((route) => {
       app[route.method](
         route.path,
-        (request: Request, response: Response, next: Function) => {
+        (req: Request, res: Response, next: Function) => {
+          res.set('Access-Control-Allow-Origin', '*');
           route
-            .action(request, response)
+            .action(req, res)
             .then(() => next)
             .catch((err) => next(err));
         }
       );
+    });
+
+    // For CORS
+    app.use((req: Request, res: Response, next: Function) => {
+      res.header('Access-Control-Allow-Origin', '*');
+      res.header(
+        'Access-Control-Allow-Headers',
+        'Origin, X-Requested-With, Content-Type, Accept'
+      );
+      res.header(
+        'Access-Control-Allow-Methods',
+        'GET, PUT, POST, DELETE, OPTIONS'
+      );
+
+      if (req.method === 'OPTIONS') {
+        res.sendStatus(200);
+      } else {
+        next();
+      }
     });
 
     // run app
