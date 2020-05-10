@@ -27,7 +27,7 @@ export async function numberGetAll(req: Request, res: Response): Promise<void> {
     query.andWhere('number.type = :type', { type: req.query.type });
   }
 
-  query.orderBy('number.event');
+  query.orderBy('number.event', 'DESC');
 
   const numberData = await query.getMany();
   res.send(numberData);
