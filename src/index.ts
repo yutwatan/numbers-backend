@@ -46,23 +46,20 @@ createConnection()
     });
 
     // DO NOT DO app.listen() unless we're testing this directly
-    if (require.main === module) {
-      //app.listen(3000);
-      //console.log('Express application is up and running on port 3000');
+    if (process.env.NODE_ENV === 'local') {
+      app.listen(3000);
+      console.log('Express application is up and running on port 3000');
+    } else {
+      // Serves on 80 and 443
+      // Get's SSL certificates magically!
+      require('greenlock-express')
+        .init({
+          packageRoot: __dirname + '/../',
+          configDir: './greenlock.d',
+          maintainerEmail: 'yutwatan@yahoo.co.jp',
+          cluster: false,
+        })
+        .serve(app);
     }
-
-    // Serves on 80 and 443
-    // Get's SSL certificates magically!
-    require("greenlock-express")
-      .init({
-        packageRoot: __dirname + '/../',
-        configDir: "./greenlock.d",
-
-        maintainerEmail: "yutwatan@yahoo.co.jp",
-
-        cluster: false
-      })
-      .serve(app);
-
   })
   .catch((error) => console.log('TypeORM connection error: ', error));

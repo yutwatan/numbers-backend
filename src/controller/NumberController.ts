@@ -116,3 +116,55 @@ export async function numberGetTop3ByYear(
 
   res.send(topThreeData);
 }
+
+/**
+ * 桁横断で出現回数を取得する
+ *   type: 3 or 4 (3 は Numbers3 のことを指す）
+ *   from: 開始日
+ *   to  : 終了日
+ */
+export async function numberGetOrderByCount(
+  req: Request,
+  res: Response
+): Promise<void> {
+  try {
+    const type = req.query.type;
+    const from = req.query.from;
+    const to = req.query.to;
+
+    // Use raw sql because queryBuilder can not use UNION
+    let sql =
+      'SELECT num, COUNT(num) AS count FROM (' +
+      'SELECT first_num AS num ' +
+      'FROM number n LEFT JOIN event e ON n.event_id = e.id ' +
+      'WHERE n.type = ? AND e.date BETWEEN ? AND ? ' +
+      'UNION ALL ' +
+      'SELECT second_num AS num ' +
+      'FROM number n LEFT JOIN event e ON n.event_id = e.id ' +
+      'WHERE n.type = ? AND e.date BETWEEN ? AND ? ' +
+      'UNION ALL ' +
+      'SELECT third_num AS num ' +
+      'FROM number n LEFT JOIN event e ON n.event_id = e.id ' +
+      'WHERE n.type = ? AND e.date BETWEEN ? AND ? ';
+    const params = [type, from, to, type, from, to, type, from, to];
+
+    if (type === 4) {
+      sql +=
+        'UNION ALL ' +
+        'SELECT fourth_num AS num ' +
+        'FROM number n LEFT JOIN event e ON n.event_id = e.id ' +
+        'WHERE n.type = $1 AND e.date BETWEEN $2 AND $3 ';
+      params.push(type);
+      params.push(from);
+      params.push(to);
+    }
+
+    sql += ') tmp GROUP BY num ORDER BY count DESC';
+
+    const numberData = await getRepository(Number).query(sql, params);
+    res.send(numberData);
+  } catch (e) {
+    console.error(e);
+    res.sendStatus(500);
+  }
+}

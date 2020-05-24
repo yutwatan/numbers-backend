@@ -2,6 +2,7 @@ import { eventGetAll, eventGetById } from './controller/EventController';
 import {
   numberGetAll,
   numberGetByNumber,
+  numberGetOrderByCount,
   numberGetTop3ByYear,
 } from './controller/NumberController';
 
@@ -20,6 +21,11 @@ export const Routes = [
     path: '/number',
     method: 'get',
     action: numberGetAll,
+  },
+  {
+    path: '/number/all_mean',
+    method: 'get',
+    action: numberGetOrderByCount,
   },
   {
     path: '/number/:number',
